@@ -986,14 +986,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   orientation: {fileID: 761154796}
-  moveSpeed: 10
-  airMultiplier: 0.4
+  moveSpeed: 15
   jumpForce: 5
+  airMultiplier: 0.4
   playerHeight: 2
   groundCheckDistance: 0.2
   groundMask:
     serializedVersion: 2
     m_Bits: 64
+  groundDrag: 0.5
+  airDrag: 0.75
+  maxSpeed: 12
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

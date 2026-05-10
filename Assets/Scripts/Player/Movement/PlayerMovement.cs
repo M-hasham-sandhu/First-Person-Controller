@@ -18,6 +18,12 @@ namespace Player.Movement
         [SerializeField] private float groundCheckDistance = 0.2f;
         [SerializeField] private LayerMask groundMask;
 
+        [Header("Drag Settings")]
+        [SerializeField] private float groundDrag = 0.5f;
+        [SerializeField] private float airDrag = 0.75f;
+        
+        [Header("Speed Limits")]
+        [SerializeField] private float maxSpeed = 6f;
         
         private Rigidbody _rb;
         private CapsuleCollider _col;
@@ -36,12 +42,14 @@ namespace Player.Movement
         {
             ReadInput();
             CheckGround();
+            ApplyDrag();
         }
 
         private void FixedUpdate()
         {
             MovePlayer();
             JumpPlayer();
+            LimitSpeed();
         }
 
         private void ReadInput()
@@ -87,6 +95,31 @@ namespace Player.Movement
             }
 
             _jumpPressed = false;
+        }
+        
+        private void ApplyDrag()
+        {
+            _rb.linearDamping = _isGrounded ? groundDrag : airDrag;
+        }
+        
+        private void LimitSpeed()
+        {
+            Vector3 velocity = _rb.linearVelocity;
+
+            Vector3 flatVelocity = new Vector3(velocity.x, 0f, velocity.z);
+
+            float maxSpeed = this.maxSpeed;
+
+            if (flatVelocity.sqrMagnitude > maxSpeed * maxSpeed)
+            {
+                Vector3 limited = flatVelocity.normalized * maxSpeed;
+
+                _rb.linearVelocity = new Vector3(
+                    limited.x,
+                    velocity.y,
+                    limited.z
+                );
+            }
         }
         
         private void OnDrawGizmos()
