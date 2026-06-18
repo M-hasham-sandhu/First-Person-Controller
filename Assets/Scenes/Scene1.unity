@@ -1029,6 +1029,8 @@ GameObject:
   - component: {fileID: 1964968571}
   - component: {fileID: 1964968570}
   - component: {fileID: 1964968572}
+  - component: {fileID: 1964968574}
+  - component: {fileID: 1964968573}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -1094,17 +1096,45 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   orientation: {fileID: 761154796}
-  moveSpeed: 15
+  walkSpeed: 6
+  sprintSpeed: 10
+  crouchSpeed: 3
   jumpForce: 5
   airMultiplier: 0.4
+  crouchYScale: 0.5
+  groundDrag: 0.5
+  airDrag: 0.75
+  state: 0
+--- !u!114 &1964968573
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1964968569}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b5e21ab84ab42cfb165c29bdc637f46, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
   playerHeight: 2
-  groundCheckDistance: 0.2
+  checkDistance: 0.2
   groundMask:
     serializedVersion: 2
     m_Bits: 64
-  groundDrag: 0.5
-  airDrag: 0.75
-  maxSpeed: 12
+  maxSlopeAngle: 45
+--- !u!114 &1964968574
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1964968569}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eaef86e374474f1fb9f4c9d40ddeda9b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
