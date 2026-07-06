@@ -22,11 +22,16 @@ namespace Player.Movement
         [Header("Drag Settings")]
         [SerializeField] private float groundDrag = 5f;
         [SerializeField] private float airDrag = 0f;
+
+        [Header("Wall Climb Movement")]
+        [SerializeField] private float climbSpeed = 4f;
+        [SerializeField] private float wallStickSpeed = 1.5f;
         
         private Rigidbody _rb;
         private PlayerInput _input;
         private GroundDetector _groundDetector;
         private WallClimb _wallClimb;
+        private WallDetector _wallDetector;
 
         private float _moveSpeed;
 
@@ -49,6 +54,7 @@ namespace Player.Movement
             _input = GetComponent<PlayerInput>();
             _groundDetector = GetComponent<GroundDetector>();
             _wallClimb = GetComponent<WallClimb>();
+            _wallDetector = GetComponent<WallDetector>();
 
             _startYScale = transform.localScale.y;
             
@@ -58,6 +64,7 @@ namespace Player.Movement
 
         private void Update()
         {
+            UpdateWallClimb();
             StateHandler();
             ApplyDrag();
         }
@@ -66,6 +73,7 @@ namespace Player.Movement
         {
             if (IsWallClimbing())
             {
+                ClimbPlayer();
                 _input.ResetJump();
                 return;
             }
@@ -171,6 +179,31 @@ namespace Player.Movement
         private bool IsWallClimbing()
         {
             return _wallClimb != null && _wallClimb.IsClimbing;
+        }
+
+        private void UpdateWallClimb()
+        {
+            if (_wallClimb == null)
+                return;
+
+            _wallClimb.Tick(
+                _input.ClimbHeld,
+                _input.VerticalInput,
+                _groundDetector.IsGrounded,
+                _wallDetector != null && _wallDetector.WallInFront
+            );
+        }
+
+        private void ClimbPlayer()
+        {
+            _rb.useGravity = false;
+
+            Vector3 wallNormal = _wallDetector != null && _wallDetector.WallInFront
+                ? _wallDetector.WallNormal
+                : -orientation.forward;
+
+            Vector3 stickVelocity = -wallNormal * wallStickSpeed;
+            _rb.linearVelocity = new Vector3(stickVelocity.x, climbSpeed, stickVelocity.z);
         }
         
         private void LimitSpeed()
