@@ -26,12 +26,26 @@ namespace Player.Movement
         [Header("Wall Climb Movement")]
         [SerializeField] private float climbSpeed = 4f;
         [SerializeField] private float wallStickSpeed = 1.5f;
-        
+
+        [Header("Wall Run Movement")]
+        [SerializeField] private float wallRunSpeed = 8f;
+        [SerializeField] private float wallStickForce = 15f;
+        [SerializeField] private float wallRunFallSpeed = 1.5f;
+        [SerializeField] private float wallRunMaxFallSpeed = -1.5f;
+
+        [Header("Wall Run Visuals")]
+        [SerializeField] private float wallRunTiltAngle = 60f;
+        [SerializeField] private float wallRunTiltSpeed = 8f;
+
         private Rigidbody _rb;
         private PlayerInput _input;
         private GroundDetector _groundDetector;
         private WallClimb _wallClimb;
         private WallDetector _wallDetector;
+        private WallRun _wallRun;
+        private WallRunDetector _wallRunDetector;
+        private WallJump _wallJump;
+        private Camera.PlayerCam _playerCam;
 
         private float _moveSpeed;
 
@@ -41,6 +55,7 @@ namespace Player.Movement
             Sprinting,
             Crouching,
             Climbing,
+            WallRunning,
             Air
         }
 
@@ -55,6 +70,10 @@ namespace Player.Movement
             _groundDetector = GetComponent<GroundDetector>();
             _wallClimb = GetComponent<WallClimb>();
             _wallDetector = GetComponent<WallDetector>();
+            _wallRun = GetComponent<WallRun>();
+            _wallRunDetector = GetComponent<WallRunDetector>();
+            _wallJump = GetComponent<WallJump>();
+            _playerCam = FindObjectOfType<Camera.PlayerCam>();
 
             _startYScale = transform.localScale.y;
             
@@ -65,8 +84,10 @@ namespace Player.Movement
         private void Update()
         {
             UpdateWallClimb();
+            UpdateWallRun();
             StateHandler();
             ApplyDrag();
+            UpdateWallRunTilt();
         }
 
         private void FixedUpdate()
@@ -74,6 +95,15 @@ namespace Player.Movement
             if (IsWallClimbing())
             {
                 ClimbPlayer();
+                _wallJump?.Tick(_input.JumpPressed);
+                _input.ResetJump();
+                return;
+            }
+
+            if (IsWallRunning())
+            {
+                WallRunPlayer();
+                _wallJump?.Tick(_input.JumpPressed);
                 _input.ResetJump();
                 return;
             }
@@ -89,6 +119,14 @@ namespace Player.Movement
             {
                 state = MovementState.Climbing;
                 _moveSpeed = 0f;
+                transform.localScale = new Vector3(transform.localScale.x, _startYScale, transform.localScale.z);
+                return;
+            }
+
+            if (IsWallRunning())
+            {
+                state = MovementState.WallRunning;
+                _moveSpeed = wallRunSpeed;
                 transform.localScale = new Vector3(transform.localScale.x, _startYScale, transform.localScale.z);
                 return;
             }
@@ -167,7 +205,7 @@ namespace Player.Movement
         
         private void ApplyDrag()
         {
-            if (IsWallClimbing())
+            if (IsWallClimbing() || IsWallRunning())
             {
                 _rb.linearDamping = airDrag;
                 return;
@@ -179,6 +217,11 @@ namespace Player.Movement
         private bool IsWallClimbing()
         {
             return _wallClimb != null && _wallClimb.IsClimbing;
+        }
+
+        private bool IsWallRunning()
+        {
+            return _wallRun != null && _wallRun.IsWallRunning;
         }
 
         private void UpdateWallClimb()
@@ -194,6 +237,29 @@ namespace Player.Movement
             );
         }
 
+        private void UpdateWallRun()
+        {
+            if (_wallRun == null || _wallRunDetector == null)
+                return;
+
+            // Wall climbing (facing the wall) takes priority over wall running (beside the wall)
+            if (IsWallClimbing())
+            {
+                _wallRun.StopRun();
+                return;
+            }
+
+            Vector3 flatVelocity = new Vector3(_rb.linearVelocity.x, 0f, _rb.linearVelocity.z);
+
+            _wallRun.Tick(
+                _wallRunDetector.WallLeft,
+                _wallRunDetector.WallRight,
+                _groundDetector.IsGrounded,
+                _input.VerticalInput,
+                flatVelocity.magnitude
+            );
+        }
+
         private void ClimbPlayer()
         {
             _rb.useGravity = false;
@@ -205,6 +271,36 @@ namespace Player.Movement
             Vector3 stickVelocity = -wallNormal * wallStickSpeed;
             _rb.linearVelocity = new Vector3(stickVelocity.x, climbSpeed, stickVelocity.z);
         }
+
+        private void WallRunPlayer()
+        {
+            _rb.useGravity = false;
+
+            Vector3 wallNormal = _wallRun.CurrentSide == WallRun.Side.Right
+                ? _wallRunDetector.RightHit.normal
+                : _wallRunDetector.LeftHit.normal;
+
+            // Direction along the wall, facing the same way the player is looking
+            Vector3 wallForward = Vector3.Cross(wallNormal, Vector3.up).normalized;
+            if (Vector3.Dot(wallForward, orientation.forward) < 0f)
+                wallForward = -wallForward;
+
+            // Keep the player glued to the wall while they slide along it
+            _rb.AddForce(-wallNormal * wallStickForce, ForceMode.Force);
+
+            // Gradual, capped fall so the run naturally peters out rather than holding altitude forever
+            float verticalVelocity = Mathf.Max(
+                _rb.linearVelocity.y - wallRunFallSpeed * Time.fixedDeltaTime,
+                wallRunMaxFallSpeed
+            );
+
+            _rb.linearVelocity = new Vector3(
+                wallForward.x * wallRunSpeed,
+                verticalVelocity,
+                wallForward.z * wallRunSpeed
+            );
+        }
+
         
         private void LimitSpeed()
         {
@@ -226,6 +322,22 @@ namespace Player.Movement
                     _rb.linearVelocity = new Vector3(limited.x, velocity.y, limited.z);
                 }
             }
-        }   
+        }
+
+        private void UpdateWallRunTilt()
+        {
+            if (_playerCam == null)
+                return;
+
+            float targetRoll = 0f;
+            if (IsWallRunning())
+            {
+                targetRoll = _wallRun.CurrentSide == WallRun.Side.Right
+                    ? wallRunTiltAngle
+                    : -wallRunTiltAngle;
+            }
+
+            _playerCam.SetTargetRoll(targetRoll, wallRunTiltSpeed);
+        }
     }
 }

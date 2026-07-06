@@ -99,6 +99,15 @@ namespace Player.Movement
             IsClimbing = false;
         }
 
+        public void ForceStopClimb()
+        {
+            if (!IsClimbing)
+                return;
+
+            IsClimbing = false;
+            _cooldownTimer = climbCooldown;
+        }
+
         private void ResetClimbTime()
         {
             _climbTimeRemaining = maxClimbTime;
