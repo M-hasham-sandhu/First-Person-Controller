@@ -26,6 +26,7 @@ namespace Player.Movement
         private Rigidbody _rb;
         private PlayerInput _input;
         private GroundDetector _groundDetector;
+        private WallClimb _wallClimb;
 
         private float _moveSpeed;
 
@@ -34,16 +35,20 @@ namespace Player.Movement
             Walking,
             Sprinting,
             Crouching,
+            Climbing,
             Air
         }
 
         public MovementState state;
+
+        public Transform Orientation => orientation;
         
         private void Awake()
         {
             _rb = GetComponent<Rigidbody>();
             _input = GetComponent<PlayerInput>();
             _groundDetector = GetComponent<GroundDetector>();
+            _wallClimb = GetComponent<WallClimb>();
 
             _startYScale = transform.localScale.y;
             
@@ -59,6 +64,12 @@ namespace Player.Movement
 
         private void FixedUpdate()
         {
+            if (IsWallClimbing())
+            {
+                _input.ResetJump();
+                return;
+            }
+
             MovePlayer();
             JumpPlayer();
             LimitSpeed();
@@ -66,6 +77,14 @@ namespace Player.Movement
 
         private void StateHandler()
         {
+            if (IsWallClimbing())
+            {
+                state = MovementState.Climbing;
+                _moveSpeed = 0f;
+                transform.localScale = new Vector3(transform.localScale.x, _startYScale, transform.localScale.z);
+                return;
+            }
+
             // Mode - Crouching
             if (_input.CrouchHeld)
             {
@@ -140,7 +159,18 @@ namespace Player.Movement
         
         private void ApplyDrag()
         {
+            if (IsWallClimbing())
+            {
+                _rb.linearDamping = airDrag;
+                return;
+            }
+
             _rb.linearDamping = _groundDetector.IsGrounded ? groundDrag : airDrag;
+        }
+
+        private bool IsWallClimbing()
+        {
+            return _wallClimb != null && _wallClimb.IsClimbing;
         }
         
         private void LimitSpeed()

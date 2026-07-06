@@ -9,6 +9,7 @@ namespace Player.Movement
         public bool JumpPressed { get; private set; }
         public bool SprintHeld { get; private set; }
         public bool CrouchHeld { get; private set; }
+        public bool ClimbHeld { get; private set; }
 
         private void Update()
         {
@@ -20,6 +21,7 @@ namespace Player.Movement
             
             SprintHeld = Input.GetKey(KeyCode.LeftShift);
             CrouchHeld = Input.GetKey(KeyCode.LeftControl);
+            ClimbHeld = Input.GetKey(KeyCode.E);
         }
 
         public void ResetJump()
