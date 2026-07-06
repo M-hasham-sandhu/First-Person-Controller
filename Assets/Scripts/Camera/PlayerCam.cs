@@ -17,6 +17,9 @@ namespace Camera
 
         private float _xRotation;
         private float _yRotation;
+        private float _targetRoll;
+        private float _currentRoll;
+        private float _rollSpeed = 10f;
 
         private void Start()
         {
@@ -48,16 +51,24 @@ namespace Camera
                 maxLookAngle
             );
 
+            _currentRoll = Mathf.MoveTowards(_currentRoll, _targetRoll, _rollSpeed * Time.deltaTime);
+
             cameraHolder.localRotation = Quaternion.Euler(
                 _xRotation,
                 _yRotation,
-                0f
+                _currentRoll
             );
             
             playerOrientation.localRotation = Quaternion.Euler(
                 0f,
                 _yRotation,
                 0f);
+        }
+
+        public void SetTargetRoll(float targetRoll, float rollSpeed)
+        {
+            _targetRoll = targetRoll;
+            _rollSpeed = Mathf.Max(1f, rollSpeed);
         }
     }
 }
