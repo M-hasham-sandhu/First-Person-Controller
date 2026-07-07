@@ -1,57 +1,57 @@
-First Person Controller Prototype
+# First Person Controller Prototype
 
-A Unity-based First Person Controller prototype focused on physics-driven movement, modular architecture, and advanced traversal mechanics. This project was created as a learning exercise to explore gameplay programming, Unity physics, and clean software design principles.
+A Unity-based First Person Controller prototype focused on physics-driven movement, advanced traversal mechanics, and clean software architecture. This project was developed as a learning exercise to deepen my understanding of gameplay programming, Unity physics, and maintainable system design.
 
-Overview
+## Features
 
-The goal of this project was not only to build movement mechanics but also to design them in a maintainable and scalable way. Each major feature is implemented as an independent component with clear responsibilities, following the principles of composition and separation of concerns.
+### Core Movement
+- Rigidbody-based first-person movement
+- Ground and air movement handling
+- Movement state management
+- Physics-driven acceleration and momentum
 
-The prototype includes:
+### Sprinting
+- Dynamic sprint speed
+- Grounded movement checks
 
-First Person Movement
-Sprinting
-Crouching
-Slope Detection and Slope-Aware Movement
-Wall Detection
-Wall Climbing
-Wall Running
-Wall Jumping
-Camera Roll/Tilt Effects
-Physics-Based Character Movement
-Gameplay Features
-Movement
-Rigidbody-driven movement
-Ground and air movement handling
-Movement state management
-Adjustable movement speeds
-Sprinting
-Increased movement speed while grounded
-Integrated into movement state system
-Crouching
-Dynamic player height scaling
-Reduced movement speed while crouched
-Slope Handling
-Ground angle detection
-Slope-aware movement projection
-Prevents unwanted sliding behavior
-Wall Climbing
-Front-facing wall detection
-Climb timers and cooldown management
-Gravity override while climbing
-Wall Running
-Left and right wall detection
-Dynamic wall direction calculation
-Camera tilt feedback
-Wall stick force for stable traversal
-Wall Jumping
-Dedicated wall jump system
-Wall-normal based jump impulses
-Compatible with both wall running and wall climbing states
-Inspired by classic traversal mechanics
-Project Architecture
+### Crouching
+- Adjustable player height
+- Reduced movement speed while crouched
 
-The project follows a modular architecture where each system owns a single responsibility.
+### Slope Handling
+- Ground detection using raycasts
+- Slope-aware movement projection
+- Prevention of unwanted sliding behavior
 
+### Wall Climbing
+- Front-facing wall detection
+- Climb timers and cooldowns
+- Custom gravity handling during climb
+
+### Wall Running
+- Left and right wall detection
+- Dynamic wall direction calculation
+- Wall stick force for stable movement
+- Camera tilt feedback
+
+### Wall Jumping
+- Dedicated wall jump system
+- Wall-normal based jump impulses
+- Compatible with wall running and wall climbing
+- Inspired by classic parkour and traversal mechanics
+
+### Camera System
+- Mouse look controller
+- Smooth camera roll effects
+- Wall-run visual feedback
+
+---
+
+## Architecture
+
+The project follows a modular architecture where each component has a clear responsibility.
+
+```text
 Player
 ├── Input
 │   └── PlayerInput.cs
@@ -73,64 +73,83 @@ Player
 └── Camera
     ├── CameraFollow.cs
     └── PlayerCam.cs
-Core Principles
-Single Responsibility Principle (SRP)
-Composition Over Inheritance
-Decoupled Systems
-Physics-Driven Gameplay
-Maintainable Code Structure
-Key Technical Learnings
+```
 
-Throughout development, this project provided practical experience with:
+### Design Principles
 
-Unity Physics
-Rigidbody movement
-Force-based acceleration
-Impulse-based jumping
-Gravity manipulation
-Drag and damping control
-Environment Detection
-Raycasting
-Surface normal calculations
-Wall angle validation
-Ground checks
-State Management
-Movement state transitions
-Traversal state handling
-Cooldowns and timers
-Priority-based movement modes
-Software Architecture
-Component-based design
-Decoupling gameplay systems
-Refactoring for maintainability
-Clean responsibility boundaries
-Notable Refactor
+- Single Responsibility Principle (SRP)
+- Composition Over Inheritance
+- Modular Architecture
+- Decoupled Gameplay Systems
+- Maintainable and Scalable Codebase
 
-One of the biggest architectural improvements during development was extracting wall jump functionality from the main movement controller into its own dedicated WallJump component.
+---
 
-This change:
+## Technical Highlights
 
-Reduced coupling between movement systems
-Improved maintainability
-Simplified future feature additions
-Better aligned the project with SRP principles
-Future Improvements
+### Unity Physics
+- Rigidbody-based movement
+- Force-driven acceleration
+- Impulse-based jumping
+- Dynamic gravity control
+- Linear damping and drag management
 
-Architecture Diagram:<img width="1200" height="2008" alt="Frist Person Controller Architecture" src="https://github.com/user-attachments/assets/13ec6dba-9032-43c5-a620-31a6ae359224" />
+### Environment Detection
+- Raycast-based wall detection
+- Surface normal calculations
+- Ground and slope checks
+- Wall angle validation
 
-Technologies
-Unity
-C#
-Unity Physics (Rigidbody)
-Raycasting
-Repository Purpose
+### State Management
+- Walking
+- Sprinting
+- Crouching
+- Airborne
+- Wall Running
+- Wall Climbing
 
-This repository serves as a learning project focused on:
+### Software Architecture
+- Feature separation into dedicated components
+- Reduced coupling between gameplay systems
+- Easy feature extension and maintenance
+- Clear ownership of responsibilities
 
-Gameplay Programming
-Unity Physics
-Movement System Design
-Software Architecture
-Clean Code Practices
+---
 
-Feedback, suggestions, and code reviews are always welcome.
+## Key Learning Outcome
+
+One of the most valuable improvements during development was refactoring wall jumping into its own dedicated `WallJump` component instead of keeping the logic inside the main movement controller.
+
+This resulted in:
+
+- Cleaner code organization
+- Better maintainability
+- Reduced dependencies between systems
+- Improved adherence to the Single Responsibility Principle
+
+---
+
+## Challenges Solved
+
+- Smooth transitions between movement states
+- Preventing conflicts between wall climbing and wall running
+- Reliable wall-normal calculations
+- Balancing responsiveness and realism
+- Managing gravity across multiple traversal mechanics
+- Designing a scalable movement architecture
+
+---
+
+### Architecture Diagram
+<img width="1200" height="2008" alt="Frist Person Controller Architecture" src="https://github.com/user-attachments/assets/809a4da2-177e-4643-b0a4-2e1c64b69546" />
+
+
+---
+
+## Technologies Used
+
+- Unity
+- C#
+- Rigidbody Physics
+- Raycasting
+- Unity Input System
